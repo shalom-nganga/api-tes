@@ -1,0 +1,835 @@
+{
+  "info": {
+    "_postman_id": "59b5e5f7-338f-4156-8999-90b31d0dc0ee",
+    "name": "Waste Management",
+    "description": "# Waste Management API\n\nA lightweight set of administrative and operations endpoints for managing waste sections, smoking zones, locations, and user/admin access in the Community App. This collection is intended for backend/admin workflows such as authentication, CRUD operations on waste sections and smoking zones, and fetching locations and user details.\n\n## Authentication\n\nMost requests are unauthenticated or use simple form bodies; however, if your API requires auth, set it using a Bearer token:\n\n```\nAuthorization: Bearer {{token}}\n\n ```\n\n- Base URL variable: `{{wasteurl}}`\n    \n- Some requests in this collection already use absolute URLs ([https://jewapropertypro.com/infinity/jewaapp/api/](https://jewapropertypro.com/infinity/jewaapp/api/)...). Others reference `{{wasteurl}}`. Keep your environment configured so both patterns work. If you consolidate later, prefer `{{wasteurl}}` for consistency.\n    \n\nIf your API issues a token after login, save it to your environment as `token` and inherit at the collection or request level.\n\n## Environments\n\nActive environment: PROD.\n\nRelevant variables to configure:\n\n- `wasteurl` – Base URL for the waste services, for example: `https://jewapropertypro.com/infinity/jewaapp/api`\n    \n- `email` – Generic account email if used by your endpoints.\n    \n- `emailwastr` – Waste admin/user email if used by auth endpoints.\n    \n\nNote: Only populate non-secret values in plain environment variables. Place secrets in the Postman Vault or use environment secret masking.\n\n## Quickstart (Suggested Workflow)\n\n1) Admin Authentication\n\n- wasteadminregister (POST {{wasteurl}}/wasteadminregister)\n    \n- wasteadminlogin (POST {{wasteurl}}/wasteadminlogin)\n    \n- If a token is returned, save it to `{{token}}` and set collection-level Bearer token.  \n    2) Manage Waste Sections\n    \n- addwastesection → getwastesection → updatewastesection → deletewastesection  \n    3) Manage Smoking Zones\n    \n- addsmokingzone → getsmokingzone → updatesmokingzone → deletesmokingzone  \n    4) Locations and User Details\n    \n- getlocations\n    \n- getuserdetails\n    \n\nRun requests top-to-bottom within each group to follow a typical CRUD lifecycle.\n\n## Request Summaries\n\nBelow are concise summaries; replace with your actual payload keys.\n\n1. wasteadminregister\n    \n    - Method: POST\n        \n    - Path: `{{wasteurl}}/wasteadminregister`\n        \n    - Purpose: Register a waste admin account.\n        \n    - Body: { \"email\": \"{{emailwastr}}\", \"password\": \"\", \"name\": \"\", ... }\n        \n2. wasteadminlogin\n    \n    - Method: POST\n        \n    - Path: `{{wasteurl}}/wasteadminlogin`\n        \n    - Purpose: Authenticate as waste admin and receive a token.\n        \n    - Body: { \"email\": \"{{emailwastr}}\", \"password\": \"\" }\n        \n3. addsmokingzone\n    \n    - Method: POST\n        \n    - Path: `https://jewapropertypro.com/infinity/jewaapp/api/addsmokingzone`\n        \n    - Purpose: Create a new smoking zone.\n        \n    - Body: { \"name\": \"\", \"locationId\": \"\", ... }\n        \n4. addwastesection\n    \n    - Method: POST\n        \n    - Path: `https://jewapropertypro.com/infinity/jewaapp/api/addwastesection`\n        \n    - Purpose: Create a new waste section.\n        \n    - Body: { \"name\": \"\", \"locationId\": \"\", ... }\n        \n5. updatesmokingzone\n    \n    - Method: POST\n        \n    - Path: `https://jewapropertypro.com/infinity/jewaapp/api/updatesmokingzone`\n        \n    - Purpose: Update an existing smoking zone.\n        \n    - Body: { \"zoneId\": \"\", \"name\": \"\", ... }\n        \n6. updatewastesection\n    \n    - Method: POST\n        \n    - Path: `https://jewapropertypro.com/infinity/jewaapp/api/updatewastesection`\n        \n    - Purpose: Update an existing waste section.\n        \n    - Body: { \"sectionId\": \"\", \"name\": \"\", ... }\n        \n7. deletesmokingzone\n    \n    - Method: POST\n        \n    - Path: `https://jewapropertypro.com/infinity/jewaapp/api/deletesmokingzone`\n        \n    - Purpose: Delete a smoking zone.\n        \n    - Body: { \"zoneId\": \"\" }\n        \n8. deletewastesection\n    \n    - Method: POST\n        \n    - Path: `https://jewapropertypro.com/infinity/jewaapp/api/deletewastesection`\n        \n    - Purpose: Delete a waste section.\n        \n    - Body: { \"sectionId\": \"\" }\n        \n9. getwastesection\n    \n    - Method: POST\n        \n    - Path: `https://jewapropertypro.com/infinity/jewaapp/api/getwastesection`\n        \n    - Purpose: Retrieve waste sections list/details.\n        \n    - Body: { \"filter\": \"\" }\n        \n10. getsmokingzone\n    \n    - Method: POST\n        \n    - Path: `https://jewapropertypro.com/infinity/jewaapp/api/getsmokingzone`\n        \n    - Purpose: Retrieve smoking zones list/details.\n        \n    - Body: { \"filter\": \"\" }\n        \n11. getlocations\n    \n    - Method: POST\n        \n    - Path: `https://jewapropertypro.com/infinity/jewaapp/api/getlocations`\n        \n    - Purpose: Retrieve list of locations available for sections/zones.\n        \n    - Body: { \"filter\": \"\" }\n        \n12. getuserdetails\n    \n    - Method: GET\n        \n    - Path:\n        \n    - Purpose: Retrieve current or specified user details.\n        \n    - Params: { \"userId\": \"\" }\n        \n\nNote: Some endpoints use absolute URLs, others use `{{wasteurl}}`. Ensure your environment has `wasteurl` set if you switch requests to use the variable.\n\n## Testing and Monitoring\n\nCollection-level post-response tests currently assert:\n\n- Status code is 200\n    \n- Response time is under 3000 ms\n    \n\nThese tests apply to every request. If your API returns non-200 for expected flows (e.g., 201 for create, 204 for delete, or 4xx/5xx for negative tests), consider moving or overriding tests at the request/folder level to avoid false failures.\n\nTo monitor uptime and regressions, create a monitor on this collection, schedule it (e.g., every 5–15 minutes), and add notifications to email/Slack. Use environments per deployment (PROD/SIT/Staging) to compare results across environments.\n\n## Run in Postman\n\nAdd this button to quickly import and run the collection (auto-updates when you share the latest):\n\n<a href=\"https://god.gw.postman.com/run-collection/13408795-cc1e8082-09b3-4721-91e9-3230e97fb2ac\"><img src=\"https://run.pstmn.io/button.svg\" alt=\"Run in Postman\"></a>\n\n  \n  \n\n## Versioning and Support\n\n- Versioning: Update this description when you introduce breaking changes. Consider adding a version variable (e.g., `{{api_version}}`) to the base path if the backend exposes versioned routes.\n    \n- Changelog: Use the collection changelog to track edits to requests and tests.\n    \n- Support: Document contact details for your team or link to your internal support channel. For public docs, you can publish documentation and optionally attach environments to illustrate variable usage.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53285954",
+    "_collection_link": "https://go.postman.co/collection/53285954-59b5e5f7-338f-4156-8999-90b31d0dc0ee?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "wasteadminregister",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Parse response JSON",
+              "let jsonData;",
+              "pm.test(\"Response is valid JSON\", function () {",
+              "    jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an(\"object\");",
+              "});",
+              "",
+              "// Basic shape checks",
+              "pm.test(\"Response has userdetails array with at least one user\", function () {",
+              "    pm.expect(jsonData).to.have.property(\"userdetails\");",
+              "    pm.expect(jsonData.userdetails).to.be.an(\"array\");",
+              "    pm.expect(jsonData.userdetails.length).to.be.above(0);",
+              "});",
+              "",
+              "// Assert status code is 200",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Assert response time < 2s",
+              "pm.test(\"Response time is under 2000 ms\", function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+              "});",
+              "",
+              "// Compare email in response to environment variable email2",
+              "pm.test(\"Response email matches environment variable email2\", function () {",
+              "    const envEmail = pm.environment.get(\"email2111\");",
+              "    pm.expect(envEmail, \"email2 should be set in the environment\").to.exist;",
+              "",
+              "",
+              "    const respEmail = jsonData.userdetails[0] && pm.response.json().userdetails[0].email;",
+              "    pm.expect(respEmail, \"email should exist in response\").to.exist;",
+              "",
+              "    pm.expect(respEmail).to.equal(envEmail);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "function generateRandomNumbers(){",
+              "    return Math.floor(Math.random()*100000);   ",
+              "}",
+              "",
+              "let prefix = 'jkamadi';",
+              "let randomnumbbers = generateRandomNumbers();",
+              "finalEmail = prefix+randomnumbbers+'@gmail.com';",
+              "",
+              "pm.environment.set(\"email2111\", finalEmail);",
+              "",
+              "",
+              "// console.log(generateRandomNumbers());",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n           \r\n                \"fname\":\"fname\",\r\n                \"lname\":\"lname\",\r\n                \"phone\":\"phone\",  \r\n                \"email\":\"{{email2111}}\",\r\n                \"password\":\"{{vault:password}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{waste_url}}/wasteadminregister",
+          "host": [
+            "{{waste_url}}"
+          ],
+          "path": [
+            "wasteadminregister"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Positive - wasteadminregister",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n           \r\n                \"fname\":\"fname\",\r\n                \"lname\":\"lname\",\r\n                \"phone\":\"phone\",  \r\n                \"email\":\"{{email}}\",\r\n                \"password\":\"Are!!764\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://jewapropertypro.com/infinity/jewaapp/api/wasteadminregister",
+              "protocol": "https",
+              "host": [
+                "jewapropertypro",
+                "com"
+              ],
+              "path": [
+                "infinity",
+                "jewaapp",
+                "api",
+                "wasteadminregister"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "Text",
+          "header": [
+            {
+              "key": "Connection",
+              "value": "Keep-Alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5, max=100"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            },
+            {
+              "key": "x-ratelimit-limit",
+              "value": "60"
+            },
+            {
+              "key": "x-ratelimit-remaining",
+              "value": "59"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "content-length",
+              "value": "232"
+            },
+            {
+              "key": "content-encoding",
+              "value": "br"
+            },
+            {
+              "key": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "date",
+              "value": "Tue, 03 Feb 2026 15:52:53 GMT"
+            },
+            {
+              "key": "alt-svc",
+              "value": "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, h3-Q050=\":443\"; ma=2592000, h3-Q046=\":443\"; ma=2592000, h3-Q043=\":443\"; ma=2592000, quic=\":443\"; ma=2592000; v=\"43,46\""
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"message\": \"Registration successful\",\n    \"userdetails\": [\n        {\n            \"id\": 73,\n            \"fullname\": \"fname lname\",\n            \"phone\": \"phone\",\n            \"email\": \"jkamadib1@kiwamitec2h.com\",\n            \"password\": \"$2y$10$eVsZb7YfCS1307VVlivvjOZoBaT6rRlhhMdJH51p750avsD5krrEW\",\n            \"sessiontoken\": null,\n            \"created_at\": \"2026-02-03 18:52:00\",\n            \"updated_at\": null\n        }\n    ],\n    \"code\": \"200\"\n}"
+        },
+        {
+          "name": "Email Field missing - wasteadminregister",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://jewapropertypro.com/infinity/jewaapp/api/wasteadminregister",
+              "protocol": "https",
+              "host": [
+                "jewapropertypro",
+                "com"
+              ],
+              "path": [
+                "infinity",
+                "jewaapp",
+                "api",
+                "wasteadminregister"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "Text",
+          "header": [
+            {
+              "key": "Connection",
+              "value": "Keep-Alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5, max=100"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            },
+            {
+              "key": "x-ratelimit-limit",
+              "value": "60"
+            },
+            {
+              "key": "x-ratelimit-remaining",
+              "value": "59"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "content-length",
+              "value": "48"
+            },
+            {
+              "key": "content-encoding",
+              "value": "br"
+            },
+            {
+              "key": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "date",
+              "value": "Tue, 03 Feb 2026 16:00:56 GMT"
+            },
+            {
+              "key": "alt-svc",
+              "value": "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, h3-Q050=\":443\"; ma=2592000, h3-Q046=\":443\"; ma=2592000, h3-Q043=\":443\"; ma=2592000, quic=\":443\"; ma=2592000; v=\"43,46\""
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"message\": {\n        \"email\": \"The email field is required.\"\n    }\n}"
+        },
+        {
+          "name": "When registration is success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n           \r\n                \"fname\":\"fname\",\r\n                \"lname\":\"lname\",\r\n                \"phone\":\"phone\",  \r\n                \"email\":\"jaczeboso@kiwamitech.com\",\r\n                \"password\":\"{{vault:password}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{waste_url}}/wasteadminregister",
+              "host": [
+                "{{waste_url}}"
+              ],
+              "path": [
+                "wasteadminregister"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "Text",
+          "header": [
+            {
+              "key": "Connection",
+              "value": "Keep-Alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5, max=100"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            },
+            {
+              "key": "x-ratelimit-limit",
+              "value": "60"
+            },
+            {
+              "key": "x-ratelimit-remaining",
+              "value": "58"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "content-length",
+              "value": "231"
+            },
+            {
+              "key": "content-encoding",
+              "value": "br"
+            },
+            {
+              "key": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 08 Feb 2026 15:33:43 GMT"
+            },
+            {
+              "key": "alt-svc",
+              "value": "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, h3-Q050=\":443\"; ma=2592000, h3-Q046=\":443\"; ma=2592000, h3-Q043=\":443\"; ma=2592000, quic=\":443\"; ma=2592000; v=\"43,46\""
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"message\": \"Registration successful\",\n    \"userdetails\": [\n        {\n            \"id\": 95,\n            \"fullname\": \"fname lname\",\n            \"phone\": \"phone\",\n            \"email\": \"jaczeboso@kiwamitech.com\",\n            \"password\": \"$2y$10$eMuDCECvcHzmzXL4WzMFWOV0yzeEndde9rtkVyEztXaxAeh5mzQvC\",\n            \"sessiontoken\": null,\n            \"created_at\": \"2026-02-08 18:33:00\",\n            \"updated_at\": null\n        }\n    ],\n    \"code\": \"200\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "wasteadminlogin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Basic response checks",
+              "pm.test(\"Response status is 2xx\", function () {   ",
+              "     pm.response.to.be.success;});",
+              "",
+              "pm.test(\"Response has JSON body\", function () { ",
+              "       pm.expect(pm.response.headers.get (\"Content-Type\")).to.include        (\"application/json\");    ",
+              "       pm.expect(() => pm.response.json()).to.not.  throw();});",
+              "       const json = pm.response.json();",
+              "       // Validate top-level message",
+              "pm.test('Message is \"Login success\"', function     () { ",
+              "        pm.expect(json).to.have.property        (\"message\");    ",
+              "        pm.expect(json.message).to.eql(\"Login success\");});",
+              "      "
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n             \r\n                \"email\":\"jaczebos1o@gmail.com\",\r\n                \"password\":\"Are!!764\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{wasteurl}}/wasteadminlogin",
+          "host": [
+            "{{wasteurl}}"
+          ],
+          "path": [
+            "wasteadminlogin"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success - wasteadminlogin",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n             \r\n                \"email\":\"jaczebos1o@gmail.com\",\r\n                \"password\":\"Are!!764\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{wasteurl}}/wasteadminlogin",
+              "host": [
+                "{{wasteurl}}"
+              ],
+              "path": [
+                "wasteadminlogin"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "Text",
+          "header": [
+            {
+              "key": "Connection",
+              "value": "Keep-Alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5, max=100"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            },
+            {
+              "key": "x-ratelimit-limit",
+              "value": "60"
+            },
+            {
+              "key": "x-ratelimit-remaining",
+              "value": "58"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "content-length",
+              "value": "264"
+            },
+            {
+              "key": "content-encoding",
+              "value": "br"
+            },
+            {
+              "key": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 08 Feb 2026 16:06:18 GMT"
+            },
+            {
+              "key": "alt-svc",
+              "value": "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, h3-Q050=\":443\"; ma=2592000, h3-Q046=\":443\"; ma=2592000, h3-Q043=\":443\"; ma=2592000, quic=\":443\"; ma=2592000; v=\"43,46\""
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"message\": \"Login success\",\n    \"userdetails\": [\n        {\n            \"id\": 3,\n            \"fullname\": \"fname lname\",\n            \"phone\": \"phone\",\n            \"email\": \"jaczebos1o@gmail.com\",\n            \"password\": \"$2y$10$L71ZQc3tIeLCp.jP6v.8.ObGrONGztEvxbYhbKKTry6d8zoMNu6tS\",\n            \"sessiontoken\": \"kf0ZSmC0ezbzyusLlUtK7MBKfUGtW1VD9iLSphGhnb2r07MppnJrAmVup6fG\",\n            \"created_at\": \"2025-08-11 18:34:00\",\n            \"updated_at\": null\n        }\n    ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "addsmokingzone",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n                     \"user_id\":\"1\",\r\n                           \"fullname\":\"fullname\",\r\n                           \"latitude\":\"latitude\",\r\n                           \"longitude\":\"longitude\",\r\n                           \"alias\":\"alias\",\r\n                           \"radius\":\"alias\",\r\n                \"status\":\"status\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://jewapropertypro.com/infinity/jewaapp/api/addsmokingzone",
+          "protocol": "https",
+          "host": [
+            "jewapropertypro",
+            "com"
+          ],
+          "path": [
+            "infinity",
+            "jewaapp",
+            "api",
+            "addsmokingzone"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "addwastesection",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n                     \"user_id\":\"1\",\r\n                           \"fullname\":\"fullname\",\r\n                           \"latitude\":\"latitude\",\r\n                           \"longitude\":\"longitude\",\r\n                           \"alias\":\"alias\",\r\n                \"status\":\"status\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://jewapropertypro.com/infinity/jewaapp/api/addwastesection",
+          "protocol": "https",
+          "host": [
+            "jewapropertypro",
+            "com"
+          ],
+          "path": [
+            "infinity",
+            "jewaapp",
+            "api",
+            "addwastesection"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "updatesmokingzone",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n                     \"id\":\"1\",\r\n                          \r\n                \"status\":\"Inactive\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://jewapropertypro.com/infinity/jewaapp/api/updatesmokingzone",
+          "protocol": "https",
+          "host": [
+            "jewapropertypro",
+            "com"
+          ],
+          "path": [
+            "infinity",
+            "jewaapp",
+            "api",
+            "updatesmokingzone"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "updatewastesection",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n                     \"id\":\"1\",\r\n                          \r\n                \"status\":\"Inactive\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://jewapropertypro.com/infinity/jewaapp/api/updatewastesection",
+          "protocol": "https",
+          "host": [
+            "jewapropertypro",
+            "com"
+          ],
+          "path": [
+            "infinity",
+            "jewaapp",
+            "api",
+            "updatewastesection"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "deletesmokingzone",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n                     \"id\":\"1\",\r\n                          \r\n                \"status\":\"Inactive\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://jewapropertypro.com/infinity/jewaapp/api/deletesmokingzone",
+          "protocol": "https",
+          "host": [
+            "jewapropertypro",
+            "com"
+          ],
+          "path": [
+            "infinity",
+            "jewaapp",
+            "api",
+            "deletesmokingzone"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "deletewastesection",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n                     \"id\":\"1\",\r\n                          \r\n                \"status\":\"Inactive\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://jewapropertypro.com/infinity/jewaapp/api/deletewastesection",
+          "protocol": "https",
+          "host": [
+            "jewapropertypro",
+            "com"
+          ],
+          "path": [
+            "infinity",
+            "jewaapp",
+            "api",
+            "deletewastesection"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getwastesection",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n                    \r\n                           \"alias\":\"alias\"\r\n               \r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://jewapropertypro.com/infinity/jewaapp/api/getwastesection",
+          "protocol": "https",
+          "host": [
+            "jewapropertypro",
+            "com"
+          ],
+          "path": [
+            "infinity",
+            "jewaapp",
+            "api",
+            "getwastesection"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getsmokingzone",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n           \"alias\":\"alias\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://jewapropertypro.com/infinity/jewaapp/api/getsmokingzone",
+          "protocol": "https",
+          "host": [
+            "jewapropertypro",
+            "com"
+          ],
+          "path": [
+            "infinity",
+            "jewaapp",
+            "api",
+            "getsmokingzone"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getlocations",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n           \"alias\":\"alias\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://jewapropertypro.com/infinity/jewaapp/api/getlocations",
+          "protocol": "https",
+          "host": [
+            "jewapropertypro",
+            "com"
+          ],
+          "path": [
+            "infinity",
+            "jewaapp",
+            "api",
+            "getlocations"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getuserdetails",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": ""
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "https://c928d8cd-cc93-4ec9-b616-d2d15b23002b.mock.pstmn.io/wasteadminlogin",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://c928d8cd-cc93-4ec9-b616-d2d15b23002b.mock.pstmn.io/wasteadminlogin",
+          "protocol": "https",
+          "host": [
+            "c928d8cd-cc93-4ec9-b616-d2d15b23002b",
+            "mock",
+            "pstmn",
+            "io"
+          ],
+          "path": [
+            "wasteadminlogin"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level post-response tests",
+          "// Asserts that every request returns 200 and responds in under 3000 ms",
+          "",
+          "pm.test(\"Status code is 200\", function () {",
+          "    pm.response.to.have.status(200);",
+          "});",
+          "",
+          "pm.test(\"Response time is under 3000 ms\", function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+          "});"
+        ]
+      }
+    }
+  ]
+}
